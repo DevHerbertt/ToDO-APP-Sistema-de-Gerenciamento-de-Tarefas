@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | ToDo App</title>
+  <style>
+    :root {
+      --primary: #667eea;
+      --secondary: #764ba2;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --warning: #f39c12;
+      --info: #3498db;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --border: #e0e0e0;
+      --bg: #f5f7fa;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+    
+    .auth-check {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 15px;
+      background-color: var(--danger);
+      color: white;
+      text-align: center;
+      z-index: 10000;
+      display: none;
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+      color: white;
+      padding: 20px 0;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      text-align: center;
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .logo h2 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+    
+    .logo p {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .nav-menu {
+      margin-top: 30px;
+    }
+    
+    .nav-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+    }
+    
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .nav-item.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+    
+    .nav-item i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    
+    /* Main Content */
+    .main-content {
+      padding: 30px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+    }
+    
+    .user-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    
+    .logout-btn {
+      background-color: var(--danger);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 15px;
+    }
+    
+    /* Task Section */
+    .task-section {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .section-header h2 {
+      font-size: 20px;
+    }
+    
+    .add-task-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    
+    .add-task-btn i {
+      margin-right: 5px;
+    }
+    
+    /* Task List */
+    .task-list {
+      list-style: none;
+    }
+    
+    .task-item {
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+    }
+    
+    .task-item:hover {
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .task-info h3 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+    
+    .task-info p {
+      font-size: 14px;
+      color: var(--text-light);
+    }
+    
+    .task-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .task-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .edit-btn {
+      background-color: var(--warning);
+      color: white;
+    }
+    
+    .delete-btn {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .complete-btn {
+      background-color: var(--success);
+      color: white;
+    }
+    
+    /* Task Status */
+    .task-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status-pending {
+      background-color: #fff4e5;
+      color: var(--warning);
+    }
+    
+    .status-completed {
+      background-color: #e6f7ee;
+      color: var(--success);
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-header h2 {
+      font-size: 22px;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .cancel-btn {
+      background-color: var(--text-light);
+      color: white;
+    }
+    
+    .save-btn {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    /* Filter Section */
+    .filter-section {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .filter-form {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .filter-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+    
+    /* Alert */
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 5px;
+      color: white;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    .alert-success {
+      background-color: var(--success);
+    }
+    
+    .alert-error {
+      background-color: var(--danger);
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .filter-form {
+        flex-direction: column;
+      }
+    }
+    /* ✅ NOVOS ESTILOS PARA TASKS COMPLETAS */
+    .task-item.completed {
+      background-color: #f8fff9;
+      border-left: 4px solid var(--success);
+      opacity: 0.8;
+    }
+    
+    .completed-text {
+      text-decoration: line-through;
+      color: var(--text-light) !important;
+    }
+    
+    .reopen-btn {
+      background-color: var(--info);
+      color: white;
+    }
+    
+    .no-tasks {
+      text-align: center;
+      color: var(--text-light);
+      padding: 20px;
+      font-style: italic;
+    }
+    
+    .task-item {
+      transition: all 0.3s ease;
+    }
+    
+    .task-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ✅ NOVOS ESTILOS PARA ADMIN */
+    .nav-item.admin-item {
+      background-color: rgba(255, 215, 0, 0.1);
+      border-left: 4px solid gold;
+    }
+    
+    .nav-item.admin-item i {
+      color: gold;
+    }
+    
+    .admin-section {
+      display: none;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .admin-section.active {
+      display: block;
+    }
+    
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .user-table th,
+    .user-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .user-table th {
+      background-color: var(--bg);
+      font-weight: 600;
+    }
+    
+    .user-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .admin-action-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-right: 5px;
+    }
+    
+    .role-btn {
+      background-color: var(--info);
+      color: white;
+    }
+    
+    .delete-user-btn {
+      background-color: var(--danger);
+      color: white;
+    }
+
+    .user-role-badge {
+      margin-left: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .role-admin {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .role-user {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    /* ✅ NOVOS ESTILOS PARA CONFIGURAÇÕES */
+    .settings-form {
+      max-width: 600px;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 10px;
+      top: 38px;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+    
+    .password-input-container {
+      position: relative;
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .update-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .cancel-update-btn {
+      background-color: var(--text-light);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <div class="auth-check" id="authCheck">
+    Verificando autenticação...
+  </div>
+  
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <h2>ToDo App</h2>
+        <p>Manage your tasks</p>
+      </div>
+      <div class="nav-menu">
+        <div class="nav-item active" data-section="tasks">
+          <i class="fas fa-tasks"></i>
+          <span>My Tasks</span>
+        </div>
+        <div class="nav-item" data-section="settings">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </div>
+        <!-- ✅ ABA ADMIN (SÓ APARECE SE FOR ADMIN) -->
+        <div class="nav-item admin-item" id="adminNavItem" data-section="admin" style="display: none;">
+          <i class="fas fa-crown"></i>
+          <span>Admin Dashboard</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="header">
+        <h1 id="headerTitle">Dashboard</h1>
+        <div class="user-info">
+          <img src="https://ui-avatars.com/api/?name=User+Name" alt="User" id="userAvatar">
+          <span id="userName">User Name</span>
+          <span id="userRole" class="user-role-badge role-user">USER</span>
+          <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+      
+      <!-- ✅ TASKS SECTION -->
+      <div class="task-section active" id="tasksSection">
+        <!-- Filter Section -->
+        <div class="filter-section">
+          <div class="section-header">
+            <h2>Filter Tasks</h2>
+          </div>
+          <form id="filterForm" class="filter-form">
+            <div class="form-group filter-group">
+              <label for="status">Status</label>
+              <select id="status" name="status">
+                <option value="">All</option>
+                <option value="PENDING">Pending</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+            </div>
+            <div class="form-group filter-group">
+              <label for="priority">Priority</label>
+              <select id="priority" name="priority">
+                <option value="">All</option>
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+              </select>
+            </div>
+            <button type="submit" class="filter-btn">Apply Filters</button>
+          </form>
+        </div>
+        
+        <!-- Tasks Section -->
+        <div class="task-section">
+          <div class="section-header">
+            <h2>My Tasks</h2>
+            <button class="add-task-btn" id="addTaskBtn">
+              <i class="fas fa-plus"></i> Add Task
+            </button>
+          </div>
+          <ul class="task-list" id="taskList">
+            <li class="no-tasks">Loading tasks...</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- ✅ SETTINGS SECTION -->
+      <div class="task-section" id="settingsSection" style="display: none;">
+        <div class="section-header">
+          <h2>Settings</h2>
+        </div>
+        <form id="settingsForm" class="settings-form">
+          <div class="form-group">
+            <label for="userNameInput">Name</label>
+            <input type="text" id="userNameInput" name="name" required>
+          </div>
+          <div class="form-group">
+            <label for="userEmail">Email</label>
+            <input type="email" id="userEmail" name="email" disabled>
+          </div>
+          <div class="form-group">
+            <label>Change Password</label>
+            <div class="password-input-container">
+              <input type="password" id="currentPassword" name="currentPassword" placeholder="Current Password">
+              <i class="fas fa-eye password-toggle" id="toggleCurrentPassword"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="password-input-container">
+              <input type="password" id="newPassword" name="newPassword" placeholder="New Password">
+              <i class="fas fa-eye password-toggle" id="toggleNewPassword"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="password-input-container">
+              <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm New Password">
+              <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="cancel-update-btn" id="cancelSettingsBtn">Cancel</button>
+            <button type="submit" class="update-btn">Update Profile</button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- ✅ ADMIN SECTION -->
+      <div class="admin-section" id="adminSection">
+        <div class="section-header">
+          <h2><i class="fas fa-crown"></i> Admin Dashboard</h2>
+        </div>
+        
+        <div class="filter-form">
+          <div class="form-group filter-group">
+            <label for="userFilter">Filter Users</label>
+            <input type="text" id="userFilter" placeholder="Search users...">
+          </div>
+          <button type="button" class="filter-btn" id="refreshUsersBtn">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+        
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr>
+              <td colspan="6" style="text-align: center;">Loading users...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add/Edit Task Modal -->
+  <div class="modal" id="taskModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Task</h2>
+        <button class="close-btn" id="closeModalBtn">&times;</button>
+      </div>
+      <form id="taskForm">
+        <input type="hidden" id="taskId">
+        <div class="form-group">
+          <label for="taskTitle">Title</label>
+          <input type="text" id="taskTitle" name="title" required>
+        </div>
+        <div class="form-group">
+          <label for="taskDescription">Description</label>
+          <textarea id="taskDescription" name="description"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="taskPriority">Priority</label>
+          <select id="taskPriority" name="priority" required>
+            <option value="LOW">Low</option>
+            <option value="MEDIUM" selected>Medium</option>
+            <option value="HIGH">High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskDueDate">Due Date</label>
+          <input type="date" id="taskDueDate" name="dueDate">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="task-btn cancel-btn" id="cancelTaskBtn">Cancel</button>
+          <button type="submit" class="task-btn save-btn">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    // Importar todas as funções da API
+    import { 
+      isAuthenticated, 
+      logout, 
+      getAuthToken,
+      fetchTasks,
+      createTask,
+      updateTask,
+      deleteTask,
+      fetchAllUsers,
+      changeUserRole,
+      deleteUser
+    } from './api.js';
+
+    // Global variables
+    let tasks = [];
+    let currentTaskId = null;
+    let currentUser = null;
+    let isAdmin = false;
+    
+    // DOM Elements
+    const authCheck = document.getElementById('authCheck');
+    const taskList = document.getElementById('taskList');
+    const taskForm = document.getElementById('taskForm');
+    const filterForm = document.getElementById('filterForm');
+    const settingsForm = document.getElementById('settingsForm');
+    const taskModal = document.getElementById('taskModal');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelTaskBtn = document.getElementById('cancelTaskBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    
+    // ✅ NOVOS ELEMENTOS ADMIN E SETTINGS
+    const adminNavItem = document.getElementById('adminNavItem');
+    const tasksSection = document.getElementById('tasksSection');
+    const settingsSection = document.getElementById('settingsSection');
+    const adminSection = document.getElementById('adminSection');
+    const usersTableBody = document.getElementById('usersTableBody');
+    const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+    const userNameSpan = document.getElementById('userName');
+    const userRoleSpan = document.getElementById('userRole');
+    const userAvatar = document.getElementById('userAvatar');
+    const userNameInput = document.getElementById('userNameInput');
+    const userEmailInput = document.getElementById('userEmail');
+    const currentPasswordInput = document.getElementById('currentPassword');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+    const headerTitle = document.getElementById('headerTitle');
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    // Password toggle elements
+    const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
+    const toggleNewPassword = document.getElementById('toggleNewPassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    
+    // Verificar autenticação
+    function checkAuth() {
+      authCheck.style.display = 'block';
+      authCheck.textContent = 'Verifying authentication...';
+      authCheck.style.backgroundColor = '#3498db';
+      
+      if (!isAuthenticated()) {
+        authCheck.textContent = 'Not authenticated. Redirecting to login...';
+        authCheck.style.backgroundColor = '#e74c3c';
+        
+        setTimeout(() => {
+          logout();
+        }, 2000);
+        return false;
+      }
+      
+      authCheck.textContent = 'Authentication verified successfully!';
+      authCheck.style.backgroundColor = '#27ae60';
+      
+      setTimeout(() => {
+        authCheck.style.display = 'none';
+      }, 2000);
+      
+      return true;
+    }
+    
+    // Check authentication on page load
+    if (!checkAuth()) {
+      // Stop execution if not authenticated
+      throw new Error('User not authenticated');
+    }
+
+    // Show alert function
+    function showAlert(message, type = 'success') {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.textContent = message;
+      document.body.appendChild(alertDiv);
+      
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 3000);
+    }
+
+    // ✅ CARREGAR DADOS DO USUÁRIO - CORRIGIDO
+    async function loadUserData() {
+  try {
+    const token = getAuthToken();
+    if (token) {
+      // ✅ CORREÇÃO: Decodificar token JWT corretamente
+      try {
+        // Dividir o token e pegar a parte do payload (índice 1)
+        const payloadBase64 = token.split('.')[1];
+        
+        // Converter de Base64URL para Base64 normal (substituir caracteres especiais)
+        const base64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
+        
+        // Decodificar e parsear o JSON
+        const payload = JSON.parse(decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join('')));
+        
+        console.log('Token payload:', payload); // Para debug
+        
+        const userRole = payload.role || payload.authorities?.[0] || 'USER';
+        
+        currentUser = {
+          id: payload.userId || payload.id || payload.sub || 1,
+          email: payload.email || payload.sub || 'user@example.com',
+          name: payload.name || payload.preferred_username || 'User',
+          role: userRole
+        };
+
+        // ✅ CORREÇÃO: Verificar se é admin (case insensitive)
+        isAdmin = userRole.toUpperCase() === 'ADMIN' || 
+                 userRole.toUpperCase().includes('ADMIN') ||
+                 (payload.authorities && payload.authorities.some(auth => 
+                  auth.toUpperCase().includes('ADMIN')));
+        
+        console.log('User role:', userRole);
+        console.log('Is admin:', isAdmin);
+        
+        // Salvar também no localStorage para consistência
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        
+        userNameSpan.textContent = currentUser.name;
+        userNameInput.value = currentUser.name;
+        userEmailInput.value = currentUser.email;
+        userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}`;
+        
+        // ✅ CORREÇÃO: Só mostrar a aba de admin se for admin
+        if (isAdmin) {
+          userRoleSpan.textContent = 'ADMIN';
+          userRoleSpan.className = 'user-role-badge role-admin';
+          adminNavItem.style.display = 'flex';
+          console.log('Aba admin visível');
+        } else {
+          userRoleSpan.textContent = 'USER';
+          userRoleSpan.className = 'user-role-badge role-user';
+          adminNavItem.style.display = 'none';
+          console.log('Aba admin oculta - usuário não é admin');
+        }
+        
+      } catch (e) {
+        console.error('Error parsing token:', e);
+        // Fallback para usuário básico se não conseguir decodificar
+        currentUser = {
+          id: 1,
+          email: 'user@example.com',
+          name: 'User',
+          role: 'USER'
+        };
+        isAdmin = false;
+        
+        userNameSpan.textContent = currentUser.name;
+        userNameInput.value = currentUser.name;
+        userEmailInput.value = currentUser.email;
+        userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}`;
+        userRoleSpan.textContent = 'USER';
+        userRoleSpan.className = 'user-role-badge role-user';
+        adminNavItem.style.display = 'none';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading user data:', error);
+    // Se houver erro ao carregar dados do usuário, fazer logout
+    showAlert('Authentication error. Redirecting to login...', 'error');
+    setTimeout(() => logout(), 2000);
+  }
+}
+    
+    // ✅ CARREGAR USUÁRIOS (APENAS ADMIN)
+    async function loadUsers() {
+      if (!isAdmin) return;
+      
+      try {
+        const users = await fetchAllUsers();
+        renderUsers(users);
+      } catch (error) {
+        console.error('Error loading users:', error);
+        if (error.message === 'Access denied') {
+          showAlert('Access denied. Admin privileges required.', 'error');
+        } else {
+          usersTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--danger);">Error loading users</td></tr>';
+        }
+      }
+    }
+    
+    // ✅ RENDERIZAR USUÁRIOS NA TABELA - CORRIGIDO
+    function renderUsers(users) {
+      if (!users || users.length === 0) {
+        usersTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No users found</td></tr>';
+        return;
+      }
+      
+      usersTableBody.innerHTML = users.map(user => `
+        <tr>
+          <td>${user.id}</td>
+          <td>${user.name || 'N/A'}</td>
+          <td>${user.email}</td>
+          <td>
+            <span class="task-status ${user.role === 'ADMIN' ? 'status-completed' : 'status-pending'}">
+              ${user.role || 'USER'}
+            </span>
+          </td>
+          <td>
+            <span class="task-status ${user.active ? 'status-completed' : 'status-pending'}">
+              ${user.active ? 'ACTIVE' : 'INACTIVE'}
+            </span>
+          </td>
+          <td>
+            ${user.email !== currentUser.email ? `
+              <button class="admin-action-btn role-btn" data-user-id="${user.id}" data-action="role">
+                <i class="fas fa-user-cog"></i> Change Role
+              </button>
+              <button class="admin-action-btn delete-user-btn" data-user-id="${user.id}" data-action="delete">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            ` : 'Current user'}
+          </td>
+        </tr>
+      `).join('');
+      
+      // Adicionar event listeners aos botões
+      document.querySelectorAll('.admin-action-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const userId = e.target.dataset.userId || e.target.parentElement.dataset.userId;
+          const action = e.target.dataset.action || e.target.parentElement.dataset.action;
+          handleAdminAction(userId, action);
+        });
+      });
+    }
+    
+    // ✅ HANDLE ADMIN ACTIONS
+    async function handleAdminAction(userId, action) {
+      if (!isAdmin) return;
+      
+      try {
+        if (action === 'role') {
+          const newRole = prompt('Enter new role (ADMIN/USER):', 'ADMIN');
+          if (newRole && ['ADMIN', 'USER'].includes(newRole.toUpperCase())) {
+            await changeUserRole(userId, newRole.toUpperCase());
+            showAlert('User role updated successfully!');
+            loadUsers();
+          }
+        } else if (action === 'delete') {
+          if (confirm('Are you sure you want to delete this user?')) {
+            await deleteUser(userId);
+            showAlert('User deleted successfully!');
+            loadUsers();
+          }
+        }
+      } catch (error) {
+        console.error('Error performing admin action:', error);
+        showAlert('Error: ' + error.message, 'error');
+      }
+    }
+    
+    // ✅ NAVEGAÇÃO ENTRE SECTIONS - CORRIGIDO
+    function setupNavigation() {
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const section = item.dataset.section;
+          
+          // ✅ CORREÇÃO: Não permitir que não-admins acessem a seção admin
+          if (section === 'admin' && !isAdmin) {
+            showAlert('Access denied. Admin privileges required.', 'error');
+            return;
+          }
+          
+          // Ativar item de navegação
+          navItems.forEach(nav => nav.classList.remove('active'));
+          item.classList.add('active');
+          
+          // Mostrar section correta
+          tasksSection.style.display = section === 'tasks' ? 'block' : 'none';
+          settingsSection.style.display = section === 'settings' ? 'block' : 'none';
+          adminSection.style.display = section === 'admin' ? 'block' : 'none';
+          
+          // Atualizar título do header
+          if (section === 'admin') {
+            headerTitle.textContent = 'Admin Dashboard';
+          } else if (section === 'settings') {
+            headerTitle.textContent = 'Settings';
+          } else {
+            headerTitle.textContent = 'Dashboard';
+          }
+          
+          // Se for admin section, carregar usuários
+          if (section === 'admin' && isAdmin) {
+            loadUsers();
+          }
+        });
+      });
+    }
+
+    // Fetch user tasks
+    async function loadTasks(filters = {}) {
+      try {
+        tasks = await fetchTasks(filters);
+        renderTasks();
+      } catch (error) {
+        if (error.message === 'Not authenticated' || error.message.includes('token')) {
+          showAlert('Session expired. Redirecting to login...', 'error');
+          setTimeout(() => logout(), 2000);
+        } else {
+          showAlert('Failed to load tasks: ' + error.message, 'error');
+        }
+      }
+    }
+    
+    // ✅ RENDER TASKS CORRIGIDO - MOSTRA TASKS COMPLETAS E DUE DATE
+    function renderTasks() {
+      taskList.innerHTML = '';
+      
+      if (tasks.length === 0) {
+        taskList.innerHTML = '<p class="no-tasks">No tasks found. Add a new task to get started!</p>';
+        return;
+      }
+      
+      tasks.forEach(task => {
+        const taskItem = document.createElement('li');
+        taskItem.className = 'task-item';
+        
+        // ✅ ADICIONA CLASSE SE TASK ESTIVER COMPLETA
+        if (task.status) {
+          taskItem.classList.add('completed');
+        }
+        
+        const statusClass = task.status ? 'status-completed' : 'status-pending';
+        const statusText = task.status ? 'Completed' : 'Pending';
+        const priorityText = task.priority || 'Not set';
+        
+        // ✅ CORREÇÃO: Formatar data corretamente
+        let dueDateText = '';
+        if (task.dueDate || task.dueData) {
+          try {
+            const dueDateValue = task.dueDate || task.dueData;
+            const dueDate = new Date(dueDateValue);
+            dueDateText = ` • Due: ${dueDate.toLocaleDateString()}`;
+          } catch (e) {
+            dueDateText = ` • Due: ${task.dueDate || task.dueData}`;
+          }
+        }
+        
+        taskItem.innerHTML = `
+          <div class="task-info">
+            <h3 class="${task.status ? 'completed-text' : ''}">${task.title}</h3>
+            <p class="${task.status ? 'completed-text' : ''}">${task.description || 'No description'}</p>
+            <div>
+              <span class="task-status ${statusClass}">${statusText}</span>
+              <span> • Priority: ${priorityText}</span>
+              ${dueDateText}
+            </div>
+          </div>
+          <div class="task-actions">
+            ${!task.status ? `
+              <button class="task-btn complete-btn" data-id="${task.id}" title="Complete Task">
+                <i class="fas fa-check"></i>
+              </button>
+            ` : `
+              <button class="task-btn reopen-btn" data-id="${task.id}" title="Reopen Task">
+                <i class="fas fa-redo"></i>
+              </button>
+            `}
+            <button class="task-btn edit-btn" data-id="${task.id}" title="Edit Task">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="task-btn delete-btn" data-id="${task.id}" title="Delete Task">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        `;
+        
+        taskList.appendChild(taskItem);
+      });
+      
+      // ✅ ADICIONA EVENT LISTENERS
+      addTaskEventListeners();
+    }
+    
+    // ✅ FUNÇÃO PARA ADICIONAR TODOS OS EVENT LISTENERS
+    function addTaskEventListeners() {
+      // Complete task
+      document.querySelectorAll('.complete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => completeTask(e.target.dataset.id || e.target.parentElement.dataset.id));
+      });
+      
+      // ✅ REOPEN TASK - NOVA FUNCIONALIDADE
+      document.querySelectorAll('.reopen-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => reopenTask(e.target.dataset.id || e.target.parentElement.dataset.id));
+      });
+      
+      // Edit task
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => editTask(e.target.dataset.id || e.target.parentElement.dataset.id));
+      });
+      
+      // Delete task
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => deleteTaskHandler(e.target.dataset.id || e.target.parentElement.dataset.id));
+      });
+    }
+    
+    // ✅ FUNÇÃO PARA REABRIR TAREFA (MARCAR COMO NÃO COMPLETA)
+    async function reopenTask(taskId) {
+      try {
+        const task = tasks.find(t => t.id == taskId);
+        if (!task) return;
+        
+        const updatedTask = await updateTask({ 
+          id: taskId,
+          title: task.title,
+          description: task.description,
+          dueDate: task.dueDate || task.dueData,
+          priority: task.priority,
+          status: false // ✅ MARCA COMO NÃO COMPLETA
+        });
+        
+        const index = tasks.findIndex(t => t.id == taskId);
+        if (index !== -1) {
+          tasks[index] = updatedTask;
+        }
+        renderTasks();
+        showAlert('Task reopened successfully!');
+      } catch (error) {
+        console.error('Error reopening task:', error);
+        if (error.message === 'Not authenticated' || error.message.includes('token')) {
+          showAlert('Session expired. Redirecting to login...', 'error');
+          setTimeout(() => logout(), 2000);
+        } else {
+          showAlert('Failed to reopen task: ' + error.message, 'error');
+        }
+      }
+    }
+    
+    async function addTaskHandler(taskData) {
+      try {
+        const newTask = await createTask(taskData);
+        tasks.push(newTask);
+        renderTasks();
+        closeModal();
+        showAlert('Task created successfully!');
+      } catch (error) {
+        console.error('Detailed error creating task:', error);
+        if (error.message === 'Not authenticated' || error.message.includes('token')) {
+          showAlert('Session expired. Redirecting to login...', 'error');
+          setTimeout(() => logout(), 2000);
+        } else {
+          showAlert('Failed to create task: ' + error.message, 'error');
+        }
+      }
+    }
+
+    async function updateTaskHandler(taskId, taskData) {
+      try {
+        const updatedTask = await updateTask({ id: taskId, ...taskData });
+        const index = tasks.findIndex(t => t.id == taskId);
+        if (index !== -1) {
+          tasks[index] = updatedTask;
+        }
+        renderTasks();
+        closeModal();
+        showAlert('Task updated successfully!');
+      } catch (error) {
+        console.error('Detailed error updating task:', error);
+        if (error.message === 'Not authenticated' || error.message.includes('token')) {
+          showAlert('Session expired. Redirecting to login...', 'error');
+          setTimeout(() => logout(), 2000);
+        } else {
+          showAlert('Failed to update task: ' + error.message, 'error');
+        }
+      }
+    }
+    
+    async function deleteTaskHandler(taskId) {
+      if (!confirm('Are you sure you want to delete this task?')) return;
+      
+      try {
+        await deleteTask(taskId);
+        tasks = tasks.filter(task => task.id != taskId);
+        renderTasks();
+        showAlert('Task deleted successfully!');
+      } catch (error) {
+        if (error.message === 'Not authenticated' || error.message.includes('token')) {
+          showAlert('Session expired. Redirecting to login...', 'error');
+          setTimeout(() => logout(), 2000);
+        } else {
+          showAlert('Failed to delete task: ' + error.message, 'error');
+        }
+      }
+    }
+    
+    // ✅ COMPLETE TASK CORRIGIDO
+    async function completeTask(taskId) {
+      try {
+        const task = tasks.find(t => t.id == taskId);
+        if (!task) return;
+        
+        const updatedTask = await updateTask({ 
+          id: taskId,
+          title: task.title,
+          description: task.description,
+          dueDate: task.dueDate || task.dueData,
+          priority: task.priority,
+          status: true
+        });
+        
+        const index = tasks.findIndex(t => t.id == taskId);
+        if (index !== -1) {
+          tasks[index] = updatedTask;
+        }
+        renderTasks();
+        showAlert('Task marked as completed!');
+      } catch (error) {
+        console.error('Detailed error completing task:', error);
+        if (error.message === 'Not authenticated' || error.message.includes('token')) {
+          showAlert('Session expired. Redirecting to login...', 'error');
+          setTimeout(() => logout(), 2000);
+        } else {
+          showAlert('Failed to complete task: ' + error.message, 'error');
+        }
+      }
+    }
+    
+    // ✅ EDIT TASK CORRIGIDO
+    function editTask(taskId) {
+      const task = tasks.find(t => t.id == taskId);
+      if (!task) return;
+      
+      currentTaskId = taskId;
+      modalTitle.textContent = 'Edit Task';
+      
+      document.getElementById('taskId').value = task.id;
+      document.getElementById('taskTitle').value = task.title;
+      document.getElementById('taskDescription').value = task.description || '';
+      document.getElementById('taskPriority').value = task.priority;
+      
+      // ✅ CORREÇÃO: Usar dueDate ou dueData
+      const dueDateValue = task.dueDate || task.dueData;
+      if (dueDateValue) {
+        try {
+          const dueDate = new Date(dueDateValue);
+          const formattedDate = dueDate.toISOString().split('T')[0];
+          document.getElementById('taskDueDate').value = formattedDate;
+        } catch (e) {
+          document.getElementById('taskDueDate').value = dueDateValue;
+        }
+      } else {
+        document.getElementById('taskDueDate').value = '';
+      }
+      
+      openModal();
+    }
+    
+    function openNewTaskModal() {
+      currentTaskId = null;
+      modalTitle.textContent = 'Add New Task';
+      taskForm.reset();
+      openModal();
+    }
+    
+    function openModal() {
+      taskModal.style.display = 'flex';
+    }
+    
+    function closeModal() {
+      taskModal.style.display = 'none';
+    }
+    
+    // ✅ TOGGLE PASSWORD VISIBILITY
+    function setupPasswordToggle() {
+      toggleCurrentPassword.addEventListener('click', () => {
+        const type = currentPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        currentPasswordInput.setAttribute('type', type);
+        toggleCurrentPassword.classList.toggle('fa-eye');
+        toggleCurrentPassword.classList.toggle('fa-eye-slash');
+      });
+      
+      toggleNewPassword.addEventListener('click', () => {
+        const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        newPasswordInput.setAttribute('type', type);
+        toggleNewPassword.classList.toggle('fa-eye');
+        toggleNewPassword.classList.toggle('fa-eye-slash');
+      });
+      
+      toggleConfirmPassword.addEventListener('click', () => {
+        const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPasswordInput.setAttribute('type', type);
+        toggleConfirmPassword.classList.toggle('fa-eye');
+        toggleConfirmPassword.classList.toggle('fa-eye-slash');
+      });
+    }
+    
+    // ✅ UPDATE USER PROFILE (SIMPLIFICADO - APENAS PARA DEMONSTRAÇÃO)
+    async function updateProfileHandler(e) {
+      e.preventDefault();
+      
+      const name = userNameInput.value;
+      const currentPassword = currentPasswordInput.value;
+      const newPassword = newPasswordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      
+      try {
+        // Atualizar nome no localStorage apenas
+        if (name !== currentUser.name) {
+          currentUser.name = name;
+          userNameSpan.textContent = name;
+          userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`;
+          localStorage.setItem('user', JSON.stringify(currentUser));
+          showAlert('Profile updated successfully!');
+        }
+        
+        // Simular atualização de senha (em um caso real, isso chamaria a API)
+        if (currentPassword && newPassword) {
+          if (newPassword !== confirmPassword) {
+            showAlert('New passwords do not match!', 'error');
+            return;
+          }
+          
+          // Simular chamada à API
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Clear password fields
+          currentPasswordInput.value = '';
+          newPasswordInput.value = '';
+          confirmPasswordInput.value = '';
+          
+          showAlert('Password updated successfully!');
+        }
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        showAlert('Failed to update profile: ' + error.message, 'error');
+      }
+    }
+    
+    // Event Listeners
+    addTaskBtn.addEventListener('click', openNewTaskModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelTaskBtn.addEventListener('click', closeModal);
+    cancelSettingsBtn.addEventListener('click', () => {
+      // Reset settings form
+      userNameInput.value = currentUser.name;
+      currentPasswordInput.value = '';
+      newPasswordInput.value = '';
+      confirmPasswordInput.value = '';
+    });
+    
+    taskForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const taskData = {
+        title: document.getElementById('taskTitle').value,
+        description: document.getElementById('taskDescription').value,
+        priority: document.getElementById('taskPriority').value,
+        dueDate: document.getElementById('taskDueDate').value || null
+      };
+      
+      if (currentTaskId) {
+        updateTaskHandler(currentTaskId, taskData);
+      } else {
+        addTaskHandler(taskData);
+      }
+    });
+    
+    filterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const statusValue = document.getElementById('status').value;
+      const priorityValue = document.getElementById('priority').value;
+      
+      const filters = {};
+      
+      if (statusValue) {
+        filters.status = statusValue;
+      }
+      
+      if (priorityValue) {
+        filters.priority = priorityValue;
+      }
+      
+      loadTasks(filters);
+    });
+    
+    settingsForm.addEventListener('submit', updateProfileHandler);
+    
+    logoutBtn.addEventListener('click', () => {
+      logout();
+    });
+
+    // ✅ EVENT LISTENER PARA REFRESH USERS
+    if (refreshUsersBtn) {
+      refreshUsersBtn.addEventListener('click', loadUsers);
+    }
+    
+    // Initialize
+    async function init() {
+      await loadUserData();
+      setupNavigation();
+      setupPasswordToggle();
+      loadTasks();
+    }
+    
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | ToDo App</title>
+  <style>
+    :root {
+      --primary: #667eea;
+      --secondary: #764ba2;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --border: #e0e0e0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 400px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      padding: 30px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 10px 0;
+    }
+
+    .header p {
+      color: var(--text-light);
+      margin: 0;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .response {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .success {
+      color: var(--success);
+    }
+
+    .error {
+      color: var(--danger);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <h1>Login</h1>
+        <p>Welcome back to ToDo App</p>
+      </div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required />
+        </div>
+        
+        <button type="submit">Sign In</button>
+      </form>
+      
+      <div id="response" class="response"></div>
+      
+      <div class="footer">
+        Don't have an account? <a href="register.html">Register</a>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+  import { loginUser } from './api.js';
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const responseElement = document.getElementById('response');
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    responseElement.textContent = "Autenticando...";
+    responseElement.className = "response";
+
+    try {
+      const result = await loginUser(email, password);
+      console.log("Resposta completa da API:", result);
+
+      // Verificação robusta da resposta
+      if (result && typeof result === 'object') {
+        if (result.success === true && result.token) {
+          // Armazenamento seguro do token
+          localStorage.setItem('token', result.token);
+          responseElement.textContent = "Login bem-sucedido! Redirecionando...";
+          responseElement.className = "response success";
+          
+          // Redirecionamento seguro com fallback
+          setTimeout(() => {
+            try {
+              const payload = JSON.parse(atob(result.token.split('.')[1]));
+              window.location.href = payload.role === 'ADMIN' 
+                ? 'admin-dashboard.html' 
+                : 'dashboard.html';
+            } catch (error) {
+              console.error("Erro ao decodificar token:", error);
+              window.location.href = 'dashboard.html'; // Fallback seguro
+            }
+          }, 1500);
+        } else {
+          // Tratamento de erros do backend
+          const errorMessage = result.message || "Credenciais inválidas ou serviço indisponível";
+          responseElement.textContent = errorMessage;
+          responseElement.className = "response error";
+          
+          // Sugestão para o usuário baseada no erro
+          if (errorMessage.includes('token')) {
+            responseElement.textContent += ". Por favor, tente novamente ou contate o suporte.";
+          }
+        }
+      } else {
+        throw new Error("Resposta inválida da API");
+      }
+    } catch (error) {
+      console.error("Erro no processo de login:", error);
+      responseElement.textContent = "Erro de conexão. Verifique sua internet e tente novamente.";
+      responseElement.className = "response error";
+    }
+  });
+</script>
+</body>
+</html>

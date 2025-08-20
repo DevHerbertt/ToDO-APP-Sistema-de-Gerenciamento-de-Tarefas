@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 400px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      padding: 30px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin: 0 0 10px 0;
+    }
+
+    .header p {
+      color: #7f8c8d;
+      margin: 0;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+      border-color: #667eea;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .response {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .success {
+      color: #27ae60;
+    }
+
+    .error {
+      color: #e74c3c;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+
+    .footer a {
+      color: #667eea;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <h1>Register</h1>
+        <p>Create your account</p>
+      </div>
+      
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" placeholder="Enter your name" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Create a password" required />
+        </div>
+        
+        <button type="submit">Register</button>
+      </form>
+      
+      <div id="response" class="response"></div>
+      
+      <div class="footer">
+        Already have an account? <a href="Login.html">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+   <script>
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const responseElement = document.getElementById('response');
+      
+      // Simulate form submission
+      responseElement.textContent = "Registration successful!";
+      responseElement.className = "response success";
+      
+      // In a real application, you would send the data to a server here
+      // and handle the response appropriately
+    });
+  </script>
+
+  <script type="module">
+    import { registerUser } from './api.js';
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const responseElement = document.getElementById('response');
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      responseElement.textContent = "Processing...";
+      responseElement.className = "response";
+
+      const result = await registerUser(name, email, password);
+
+      if (result.success) {
+        responseElement.textContent = "Registration successful! Redirecting to login...";
+        responseElement.className = "response success";
+        setTimeout(() => window.location.href = 'login.html', 2000);
+      } else {
+        responseElement.textContent = result.message;
+        responseElement.className = "response error";
+      }
+    });
+  </script>
+</body>
+</html>

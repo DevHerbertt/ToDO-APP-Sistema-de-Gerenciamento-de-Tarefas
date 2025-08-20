@@ -1,0 +1,14 @@
+server:
+  error:
+    include-stacktrace: never  # Corrigido o nome da propriedade, de 'Include-stacktrace' para 'include-stacktrace'
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/ToDo-API?createDatabaseIfNotExist=true  # Adicionado allowPublicKeyRetrieval=true
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update  # Corrigido de 'hiberbate' para 'hibernate'
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
