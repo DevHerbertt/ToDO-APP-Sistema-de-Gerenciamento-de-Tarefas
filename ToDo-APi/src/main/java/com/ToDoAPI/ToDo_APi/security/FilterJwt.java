@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Arrays;
 
+@Log4j2
 @Component
 public class FilterJwt extends OncePerRequestFilter {
 
@@ -24,33 +26,32 @@ public class FilterJwt extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("=== JWT FILTER ===");
-        System.out.println("URL: " + request.getRequestURL());
-        System.out.println("METHOD: " + request.getMethod());
+        log.debug("=== JWT FILTER STARTED ===");
+        log.debug("Request URL: {}", request.getRequestURL());
+        log.debug("Request Method: {}", request.getMethod());
 
         String authHeader = request.getHeader("Authorization");
-        System.out.println("AUTH HEADER: " + authHeader);
+        log.debug("Authorization Header: {}", authHeader);
 
-        // ✅ PERMITIR LOGIN E REGISTER SEM TOKEN
+        // Permitir login e register sem token
         if (request.getRequestURL().toString().contains("/api/users/login") ||
                 request.getRequestURL().toString().contains("/api/users/register")) {
-            System.out.println("✅ Skipping JWT filter for auth endpoints");
+            log.debug("Skipping JWT filter for public auth endpoints.");
             filterChain.doFilter(request, response);
             return;
         }
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("❌ No auth header or not Bearer");
+            log.warn("Missing or invalid Authorization header.");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Missing or invalid authorization header");
             return;
         }
 
         String token = authHeader.substring(7);
-        System.out.println("Token: " + (token.length() > 50 ? token.substring(0, 50) + "..." : token));
+        log.debug("Token received: {}", token.length() > 50 ? token.substring(0, 50) + "..." : token);
 
         try {
-            // ✅ VALIDAR TOKEN DIRETAMENTE AQUI
             Claims claims = Jwts.parser()
                     .setSigningKey(secretKey)
                     .parseClaimsJws(token)
@@ -59,21 +60,20 @@ public class FilterJwt extends OncePerRequestFilter {
             String username = claims.getSubject();
             String role = claims.get("role", String.class);
 
-            System.out.println("✅ Valid token for user: " + username);
-            System.out.println("✅ User role: " + role);
+            log.info("Valid token for user: {}", username);
+            log.info("User role: {}", role);
 
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
 
-            org.springframework.security.authentication.UsernamePasswordAuthenticationToken authentication =
-                    new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                            username, null, Arrays.asList(authority));
+            var authentication = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    username, null, Arrays.asList(authority));
 
             org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(authentication);
 
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
-            System.out.println("❌ Token validation error: " + e.getMessage());
+            log.error("Token validation failed: {}", e.getMessage(), e);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Invalid token: " + e.getMessage());
         }

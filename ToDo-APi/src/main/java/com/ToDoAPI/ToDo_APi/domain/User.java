@@ -17,6 +17,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private String password;
     private String email;
@@ -26,6 +27,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
     private LocalDateTime lastActiveDate;
 
 }

@@ -1,6 +1,7 @@
 package com.ToDoAPI.ToDo_APi.security;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,12 +16,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+@Log4j2
 @Configuration
 public class SecurityConfiguration {
 
     private final FilterJwt filterJwt;
 
-    // ✅ Remova @RequiredArgsConstructor e faça construtor manualmente
+
     public SecurityConfiguration(FilterJwt filterJwt) {
         this.filterJwt = filterJwt;
     }
@@ -37,7 +39,7 @@ public class SecurityConfiguration {
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
-                            System.out.println("⚠️ Unauthorized access attempt: " + request.getRequestURL());
+                            log.warn("Unauthorized access attempt: " + request.getRequestURL());
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                         })
                 )

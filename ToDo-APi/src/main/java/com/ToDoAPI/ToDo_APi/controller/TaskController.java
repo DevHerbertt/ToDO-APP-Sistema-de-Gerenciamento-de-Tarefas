@@ -7,11 +7,13 @@ import com.ToDoAPI.ToDo_APi.DTO.TaskFilterDTO;
 import com.ToDoAPI.ToDo_APi.domain.Task;
 import com.ToDoAPI.ToDo_APi.service.TaskService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Log4j2
 @RestController
 @RequestMapping("/api/tasks")
 @RequiredArgsConstructor
@@ -22,14 +24,14 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<Task> createTask(@RequestBody TaskCreateDTO dto) {
-
-        System.out.println("Recebendo tarefa: " + dto); // Debug
+        System.out.println("==========================================");
+        log.info("Recebendo tarefa: {} " ,dto);
         try {
             Task task = taskService.createTask(dto);
-            System.out.println("Tarefa criada: " + task); // Debug
+             log.info("Tarefa criada: {}" , task);
             return ResponseEntity.status(201).body(task);
         } catch (Exception e) {
-            System.out.println("Erro ao criar tarefa: " + e.getMessage()); // Debug
+            log.warn("Erro ao criar tarefa: {}" ,e.getMessage());
             throw e;
         }
     }

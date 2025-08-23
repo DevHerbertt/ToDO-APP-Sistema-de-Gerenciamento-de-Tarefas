@@ -6,6 +6,7 @@ import com.ToDoAPI.ToDo_APi.domain.User;
 import com.ToDoAPI.ToDo_APi.repository.TaskRepository;
 import com.ToDoAPI.ToDo_APi.repository.UserRespository;
 import com.ToDoAPI.ToDo_APi.util.Role;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Log4j2
 @Service
 public class AdminService {
     @Autowired
@@ -24,13 +25,12 @@ public class AdminService {
 
 
     public List<Task> getAllTasksForAdmin() {
-        // Removido a verificação de admin
+        log.debug("Starting method getAllTasksForAdmin at {}",LocalDateTime.now());
         return taskRepository.findAll();
     }
 
     public Task createTaskForUser(TaskCreateDTO dto, Long userId) {
-        // Removido a verificação de admin
-
+        log.debug("Starting method createTaskForUser at {}",LocalDateTime.now());
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
@@ -42,12 +42,14 @@ public class AdminService {
         task.setCreatedAt(LocalDateTime.now());
         task.setUpdateAt(LocalDateTime.now());
         task.setCreator(user);
-
+        log.debug("Title : {} \n Description : {} \n DueData : {} \n Status : {} \n CreatedAt: {} \n UpdateAt: {} \n Creator : {}",
+                dto.getTitle(),dto.getDescription(),dto.getDueData(),false,LocalDateTime.now(),LocalDateTime.now(),user);
         return taskRepository.save(task);
     }
 
     public void deleteAnyTask(Long id) {
-        // Removido a verificação de admin
+        log.debug("Starting method deleteAnyTask at {}",LocalDateTime.now());
+        log.debug("Id Task : {}",id);
         if (!taskRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
         }
@@ -55,34 +57,32 @@ public class AdminService {
     }
 
     public List<User> getAllUsers() {
-        // Removido a verificação de admin
+        log.debug("Starting method getAllUsers at {}",LocalDateTime.now());
         return userRepository.findAll();
     }
 
     public User changeUserRole(Long userId, String newRole) {
-        // Removido a verificação de admin
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-
+        log.debug("Starting method changeUserRole at {}",LocalDateTime.now());
+        log.debug("ID: {}  ROLE:{}",userId,newRole);
         Role role;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found"));
+        log.debug("User Id identified");
         try {
-            role = Role.valueOf(newRole.toUpperCase()); // Converte string para enum
+            role = Role.valueOf(newRole.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Papel inválido: " + newRole);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role not exists : " + newRole);
         }
-
         user.setRole(role);
         return userRepository.save(user);
     }
 
     public void deleteUser(Long userId) {
-        // Removido a verificação de admin
-
+        log.debug("Starting method deleteUser at {}",LocalDateTime.now());
+        log.debug("Id of User is  {}",userId);
         if (!userRepository.existsById(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found");
         }
-
         userRepository.deleteById(userId);
     }
 }

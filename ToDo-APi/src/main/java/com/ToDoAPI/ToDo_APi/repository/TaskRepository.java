@@ -8,12 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task,Long>, JpaSpecificationExecutor<Task> {
-
-
     List<Task> findByTitleContainingIgnoreCase(String title);
-
     List<Task> findByCreator(User creator);
-
-
     List<Task> findByCreatorEmail(String email);
 }

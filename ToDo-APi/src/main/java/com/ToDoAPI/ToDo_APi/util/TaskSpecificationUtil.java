@@ -10,7 +10,7 @@ public class TaskSpecificationUtil {
         return (root, query, cb) -> {
             Predicate predicate = cb.equal(root.get("creator").get("email"), email);
 
-            // ✅ CORREÇÃO: Filtro por status (completed)
+
             if (dto.getStatus() != null) {
                 predicate = cb.and(predicate, cb.equal(root.get("status"), dto.getStatus()));
             }

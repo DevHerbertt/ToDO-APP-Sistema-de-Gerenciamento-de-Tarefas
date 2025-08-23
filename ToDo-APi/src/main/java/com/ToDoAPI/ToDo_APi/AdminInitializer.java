@@ -21,9 +21,7 @@ public class AdminInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // ✅ CORREÇÃO: Use findByEmail ou findByName se existir
         Optional<User> existingAdmin = userRepository.findByEmail("admin@ad");
-
         if (existingAdmin.isEmpty()) {
             createAdminUser();
         } else {
@@ -33,7 +31,6 @@ public class AdminInitializer implements CommandLineRunner {
 
     private void createAdminUser() {
         try {
-            // Criação do usuário admin inicial
             User admin = new User();
             admin.setName("admin");
             admin.setEmail("admin@ad");
@@ -50,7 +47,7 @@ public class AdminInitializer implements CommandLineRunner {
 
         } catch (Exception e) {
             System.out.println("Erro ao criar admin: " + e.getMessage());
-            // Não relance a exceção para não parar a aplicação
+
         }
     }
 }

@@ -14,6 +14,7 @@ public class TaskFilterDTO {
     private String title;
     private LocalDate dueData;
     private PriorityTask priority;
+
     @JsonProperty("completed")
     private Boolean status;
 }
